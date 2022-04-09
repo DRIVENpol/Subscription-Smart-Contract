@@ -64,6 +64,8 @@ contract Subscription {
 
         totalPaymentsEth = 0;
         totalPaymentsErc20 = 0;
+
+        ethFee = 1000000000000000000; // 1 Eth by default
     }
 
     // Modifier

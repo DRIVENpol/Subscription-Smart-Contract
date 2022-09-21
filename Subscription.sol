@@ -65,17 +65,17 @@ contract Subscription {
         totalPaymentsEth = 0;
         totalPaymentsErc20 = 0;
 
-        ethFee = 1000000000000000000; // 1 Eth by default
+        ethFee = 1 ether; // 1 Eth by default
     }
 
     // Modifier
-    modifier onlyOwner {
+    modifier onlyOwner() {
         require(msg.sender == owner, "You are not the owner!");
         _;
     }
 
     // Check if user paid - modifier
-    modifier userPaid {
+    modifier userPaid() {
         require(block.timestamp < userPayment[msg.sender].paymentExpire, "Your payment expired!"); // Time now < time when last payment expire
         _;
     }
@@ -130,12 +130,12 @@ contract Subscription {
 
     // Action for testing
     // Add your function instead
-    function doAction() public userPaid {
+    function doAction() public userPaid() {
         forTesting = forTesting.add(1);
     }
 
     // Setters
-    function setEthFee(uint256 _newEthFee) public onlyOwner {
+    function setEthFee(uint256 _newEthFee) public onlyOwner() {
         ethFee = _newEthFee;
     }
 

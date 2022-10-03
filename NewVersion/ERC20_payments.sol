@@ -74,8 +74,8 @@ abstract contract SubscriptionInErc20 is Ownable {
         erc20Fee = _newErc20Fee;
     }
 
-    function setErc20TokenForPayments(IERC20 _newErc20Token) public virtual onlyOwner {
-        erc20Token = _newErc20Token;
+    function setErc20TokenForPayments(address _newErc20Token) public virtual onlyOwner {
+        erc20Token = IERC20(_newErc20Token);
     }
 
     function setNewPaymentCollector(address _feeColector) public virtual onlyOwner {
@@ -92,6 +92,6 @@ abstract contract SubscriptionInErc20 is Ownable {
     }
 
     function paymentsInSmartContract() public view virtual returns(uint256) {
-        return erc20Token.balanceOf(address(this))
+        return erc20Token.balanceOf(address(this));
     }
 }

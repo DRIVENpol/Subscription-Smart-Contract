@@ -3,7 +3,7 @@
 pragma solidity 0.8.10;
 
 // Import the subscription smart contract
-import "https://github.com/DRIVENpol/Subscription-Smart-Contract/blob/main/NewVersion/ETH_payments.sol";
+import "https://github.com/DRIVENpol/Subscription-Smart-Contract/blob/main/NewVersion/ETH_payment.sol";
 
 
 contract Example_SC is SubscriptionInEth {

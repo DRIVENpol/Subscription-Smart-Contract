@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 // Solidity Version
-pragma solidity 0.8.10;
+pragma solidity ^0.8.0;
 
 // Ownership
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -78,7 +78,7 @@ abstract contract SubscriptionInEth is Ownable {
          payable(feeColector).transfer(address(this).balance);
     }
 
-    // Getters
+    // Getter
     function lastPaymentOfUser(address _user) public view virtual returns(uint256) {
         return userPaymentEth[_user].paymentMoment;
     }

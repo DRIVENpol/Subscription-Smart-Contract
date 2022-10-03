@@ -79,5 +79,9 @@ abstract contract SubscriptionInEth is Ownable {
     // Getter
     function lastPaymentOfUser(address _user) public view virtual returns(uint256) {
         return userPaymentEth[_user].paymentMoment;
-    } 
+    }
+
+    function paymentsInSmartcontract() public view virtual returns(uint256) {
+        return address(this).balance;
+    }
 }

@@ -117,8 +117,8 @@ abstract contract SubscriptionErc20AndEth is Ownable {
         erc20Fee = _newErc20Fee;
     }
 
-    function setTokenForPayment(IERC20 _newToken) public virtual onlyOwner {
-        erc20Token = _newToken;
+    function setErc20TokenForPayments(address _newErc20Token) public virtual onlyOwner {
+        erc20Token = IERC20(_newErc20Token);
     }
 
     // Getters

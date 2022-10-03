@@ -146,5 +146,7 @@ abstract contract SubscriptionErc20AndEth is Ownable {
     function paymentsInSmartContractEth() public view virtual returns(uint256) {
         return address(this).balance;
     }
+    
+    // Created by @polthedev | DRIVENlabs Inc. (www.drivenecosystem.com)
 
 }

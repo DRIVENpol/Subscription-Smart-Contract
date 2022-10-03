@@ -78,7 +78,7 @@ abstract contract SubscriptionInEth is Ownable {
          payable(feeColector).transfer(address(this).balance);
     }
 
-    // Getter
+    // Getters
     function lastPaymentOfUser(address _user) public view virtual returns(uint256) {
         return userPaymentEth[_user].paymentMoment;
     }

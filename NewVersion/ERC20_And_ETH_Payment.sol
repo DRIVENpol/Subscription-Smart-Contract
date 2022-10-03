@@ -108,7 +108,7 @@ abstract contract SubscriptionErc20AndEth is Ownable {
         }
     }
 
-    // Setters
+    // Only-owner functions
     function setEthFee(uint256 _newEthFee) public virtual onlyOwner {
         ethFee = _newEthFee;
     }

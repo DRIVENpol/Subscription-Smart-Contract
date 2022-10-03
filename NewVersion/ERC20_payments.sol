@@ -13,6 +13,7 @@ abstract contract SubscriptionInErc20 is Ownable {
 
     // Who can withdraw the fees
     address public feeColector;
+    IERC20 public erc20Token;
 
     // Struct for payments
     struct Erc20Payment {
@@ -78,7 +79,7 @@ abstract contract SubscriptionInErc20 is Ownable {
     }
 
     function withdrawErc20() public virtual onlyOwner {
-         payable(feeColector).transfer(address(this).balance);
+         erc20Token.transfer(feeColector, erc20Token.balanceOf(address(this)));
     }
 
     // Getter

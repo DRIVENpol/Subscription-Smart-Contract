@@ -8,7 +8,47 @@ Back in April, I wrote an article about how you can create a subscription-based 
 
 ---
 
-READ THE FULL ARTICLE: https://medium.com/@psocarde/subscription-based-smart-contract-update-4605ba8be440
+<b>What you need to know</b>
 
 ---
 
+https://medium.com/@psocarde/subscription-based-smart-contract-update-4605ba8be440
+
+---
+
+<b>Only-owner functions [Blockchain's native tokens]
+  - setEthFee
+  - setNewPaymentCollector
+  - withdrawEth
+  
+<b>User functions [Blockchain's native tokens]
+  - paySubscription
+   
+ ---
+  
+<b>Only-owner functions [ERC20 tokens]
+  - setErc20Fee
+  - setErc20TokenForPayments
+  - setNewPaymentCollector
+  - withdrawErc20
+  
+<b>User functions [ERC20 tokens]
+  - paySubscription
+  
+---
+
+<b>Only-owner functions [Both]
+  - setEthFee
+  - setNewPaymentCollector
+  - withdrawEth
+  - setErc20Fee
+  - setErc20TokenForPayments
+  - setNewPaymentCollector
+  - withdrawErc20
+  
+<b>User functions [Both]
+  - paySubscription: there is a _paymentOption variable that can be equal to 1 or 2 (1 = eth payment | 2 = erc20 payment). In this way you allow the user to choose one of two payment options.
+
+---
+
+Did you inherite one of those smart contracts in your project? If yes, let me know!

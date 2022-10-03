@@ -147,6 +147,6 @@ abstract contract SubscriptionErc20AndEth is Ownable {
         return address(this).balance;
     }
     
-    // Created by @polthedev | DRIVENlabs Inc. (www.drivenecosystem.com)
+    // Created by @polthedev (https://twitter.com/polthedev) | DRIVENlabs Inc. (www.drivenecosystem.com)
 
 }

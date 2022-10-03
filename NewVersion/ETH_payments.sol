@@ -3,9 +3,6 @@
 // Solidity Version
 pragma solidity 0.8.10;
 
-// Import IERC20 for ERC20 token manipulation
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
 // Ownership
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -81,7 +78,7 @@ abstract contract SubscriptionInEth is Ownable {
          payable(feeColector).transfer(address(this).balance);
     }
 
-    // Getter
+    // Getters
     function lastPaymentOfUser(address _user) public view virtual returns(uint256) {
         return userPaymentEth[_user].paymentMoment;
     }

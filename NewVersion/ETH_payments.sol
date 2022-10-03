@@ -35,7 +35,9 @@ abstract contract SubscriptionInEth is Ownable {
     event UserPaidEth(address indexed who, uint256 indexed fee, uint256 indexed period);
 
     // Constructor
-    constructor() {
+    constructor(uint256 _ethFee) {
+        ethFee = _ethFee;
+
         _transferOwnership(_msgSender());
         feeColector = _msgSender();
     }

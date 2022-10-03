@@ -16,28 +16,28 @@ https://medium.com/@psocarde/subscription-based-smart-contract-update-4605ba8be4
 
 ---
 
-<b>Only-owner functions [Blockchain's native tokens]
+<b>Only-owner functions [Blockchain's native tokens]</b>
   - setEthFee
   - setNewPaymentCollector
   - withdrawEth
   
-<b>User functions [Blockchain's native tokens]
+<b>User functions [Blockchain's native tokens]</b>
   - paySubscription
    
  ---
   
-<b>Only-owner functions [ERC20 tokens]
+<b>Only-owner functions [ERC20 tokens]</b>
   - setErc20Fee
   - setErc20TokenForPayments
   - setNewPaymentCollector
   - withdrawErc20
   
-<b>User functions [ERC20 tokens]
+<b>User functions [ERC20 tokens]</b>
   - paySubscription
   
 ---
 
-<b>Only-owner functions [Both]
+<b>Only-owner functions [Both]</b>
   - setEthFee
   - setNewPaymentCollector
   - withdrawEth
@@ -46,7 +46,7 @@ https://medium.com/@psocarde/subscription-based-smart-contract-update-4605ba8be4
   - setNewPaymentCollector
   - withdrawErc20
   
-<b>User functions [Both]
+<b>User functions [Both]</b>
   - paySubscription: there is a _paymentOption variable that can be equal to 1 or 2 (1 = eth payment | 2 = erc20 payment). In this way you allow the user to choose one of two payment options.
 
 ---

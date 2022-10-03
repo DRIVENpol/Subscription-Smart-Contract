@@ -4,12 +4,12 @@ Back in April, I wrote an article about how you can create a subscription-based 
 
 ---
 
-The source code: https://github.com/DRIVENpol/Subscription-Smart-Contract/tree/main/NewVersion <br/>
-Examples: https://github.com/DRIVENpol/Subscription-Smart-Contract/tree/main/NewVersion/Examples
+<b>The source code:</b> https://github.com/DRIVENpol/Subscription-Smart-Contract/tree/main/NewVersion <br/>
+<b>Examples:</b> https://github.com/DRIVENpol/Subscription-Smart-Contract/tree/main/NewVersion/Examples
 
 ---
 
-OPTION 1: Accept payments in blockchain's native token
+<b>OPTION 1:</b> Accept payments in blockchain's native token
 
 <b>Step 1:</b> Import the smart contract directly from my Github
 

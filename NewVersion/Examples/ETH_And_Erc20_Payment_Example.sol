@@ -10,8 +10,17 @@ contract Example_SC is SubscriptionErc20AndEth {
 
   uint256 public c = 0;
 
-  constructor() {
-  }
+  constructor() { 
+    // Set the address of the token used for payments // In this case: BUSD (BSC Mainnet) 
+    setErc20TokenForPayments(0x55d398326f99059fF775485246999027B3197955); 
+
+    // We set the fee to 1 BUSD (1 * 10 * 18) 
+    setErc20Fee(1000000000000000000);
+    
+    // We set the fee to 1 Ether (1 * 10 * 18)
+    setEthFee(1000000000000000000);
+
+}
 
   // We use the "userPaid" modifier and we allow only users with valid subscriptions to call this function
   function increaseC() public userPaid {

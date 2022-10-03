@@ -1,3 +1,6 @@
+!!! THERE IS A NEW VERSION OF THIS SMART CONTRACT: https://github.com/DRIVENpol/Subscription-Smart-Contract/tree/main/NewVersion !!!
+
+
 // SPDX License
 //SPDX-License-Identifier: MIT
 

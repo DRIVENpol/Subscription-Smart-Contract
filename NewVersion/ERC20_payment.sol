@@ -57,7 +57,7 @@ abstract contract SubscriptionInErc20 is Ownable {
 
      // Make a payment
     function paySubscription(uint256 _period) public payable virtual callerIsUser { 
-        require(msg.value == erc20Fee * _period, "Invalid!");
+        require(erc20Token.transfer(address(this), _period * erc20Fee));
 
         totalPaymentsErc20 = totalPaymentsErc20 + msg.value; // Compute total payments in Eth
         userTotalPaymentsErc20[msg.sender] = userTotalPaymentsErc20[msg.sender] + msg.value; // Compute user's total payments in Eth

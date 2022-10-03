@@ -4,7 +4,7 @@ Back in April, I wrote an article about how you can create a subscription-based 
 
 ---
 
-The source code: https://github.com/DRIVENpol/Subscription-Smart-Contract/tree/main/NewVersion
+The source code: https://github.com/DRIVENpol/Subscription-Smart-Contract/tree/main/NewVersion <br/>
 Examples: https://github.com/DRIVENpol/Subscription-Smart-Contract/tree/main/NewVersion/Examples
 
 ---

@@ -86,4 +86,7 @@ abstract contract SubscriptionInEth is Ownable {
     function paymentsInSmartContract() public view virtual returns(uint256) {
         return address(this).balance;
     }
+    
+    // Created by @polthedev (https://twitter.com/polthedev) | DRIVENlabs Inc. (www.drivenecosystem.com)
+      
 }

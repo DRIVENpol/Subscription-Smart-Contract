@@ -9,14 +9,14 @@ Examples: https://github.com/DRIVENpol/Subscription-Smart-Contract/tree/main/New
 
 ---
 
-Option 1: Accept payments in blockchain's native token
+OPTION 1: Accept payments in blockchain's native token
 
-Step 1: Import the smart contract directly from my Github
+<b>Step 1:</b> Import the smart contract directly from my Github
 
 import "https://github.com/DRIVENpol/Subscription-Smart-Contract/blob/main/NewVersion/ETH_payment.sol";
 
 
-Step 2: Create your smart contract and inherite the imported one
+<b>Step 2:</b> Create your smart contract and inherite the imported one
 contract Example_SC is SubscriptionInEth {
 }
 

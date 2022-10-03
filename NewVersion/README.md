@@ -4,22 +4,11 @@ Back in April, I wrote an article about how you can create a subscription-based 
 
 ---
 
-<b>The source code:</b> https://github.com/DRIVENpol/Subscription-Smart-Contract/tree/main/NewVersion <br/>
 <b>Examples:</b> https://github.com/DRIVENpol/Subscription-Smart-Contract/tree/main/NewVersion/Examples
 
 ---
 
-<b>OPTION 1:</b> Accept payments in blockchain's native token
-
-<b>Step 1:</b> Import the smart contract directly from my Github
-
-import "https://github.com/DRIVENpol/Subscription-Smart-Contract/blob/main/NewVersion/ETH_payment.sol";
-
-
-<b>Step 2:</b> Create your smart contract and inherite the imported one
-contract Example_SC is SubscriptionInEth {
-}
-
+READ THE FULL ARTICLE: https://medium.com/@psocarde/subscription-based-smart-contract-update-4605ba8be440
 
 ---
-READ THE FULL ARTICLE: https://medium.com/@psocarde/subscription-based-smart-contract-update-4605ba8be440
+

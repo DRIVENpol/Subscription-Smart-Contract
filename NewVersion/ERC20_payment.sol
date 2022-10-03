@@ -94,4 +94,7 @@ abstract contract SubscriptionInErc20 is Ownable {
     function paymentsInSmartContract() public view virtual returns(uint256) {
         return erc20Token.balanceOf(address(this));
     }
+    
+    // Created by @polthedev (https://twitter.com/polthedev) | DRIVENlabs Inc. (www.drivenecosystem.com)
+      
 }

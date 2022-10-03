@@ -34,6 +34,9 @@ abstract contract SubscriptionInEth is Ownable {
     uint256 public totalPaymentsEth;
     mapping (address => uint256) public userTotalPaymentsEth;
 
+    // Events
+    event UserPaidEth(address indexed who, uint256 indexed fee, uint256 indexed period);
+
     // Constructor
     constructor() {
         _transferOwnership(_msgSender());
@@ -52,7 +55,7 @@ abstract contract SubscriptionInEth is Ownable {
     }
 
      // Make a payment
-    function paySubscription(uint256 _period) public virtual payable callerIsUser { 
+    function paySubscription(uint256 _period) public payable virtual callerIsUser { 
         require(msg.value == ethFee * _period, "Invalid!");
 
         totalPaymentsEth = totalPaymentsEth + msg.value; // Compute total payments in Eth
@@ -61,6 +64,8 @@ abstract contract SubscriptionInEth is Ownable {
         EthPayment memory newPayment = EthPayment(msg.sender, block.timestamp, block.timestamp + _period * 30 days);
         ethPayments.push(newPayment); // Push the payment in the payments array
         userPaymentEth[msg.sender] = newPayment; // User's last payment
+
+        emit UserPaidEth(msg.sender, ethFee * _period, _period);
     }
 
     // Only-owner functions

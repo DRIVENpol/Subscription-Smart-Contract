@@ -90,7 +90,7 @@ abstract contract SubscriptionErc20AndEth is Ownable {
     /// @notice User can chose to pay either in Eth, either in Erc20 Tokens
     /// @param _period For how many months the user wants to pay the subscription
     /// @param _paymentOption 1 - if the user wants to pay in Eth; 2 - if the user wants to pay in Erc20
-    function paySubscription(uint256 _period, uint256 _paymentOption) public payable virtual callerIsUser {
+    function paySubscription(uint256 _period, uint256 _paymentOption) external payable virtual callerIsUser {
 
         require(_paymentOption == 1 || _paymentOption == 2, "Invalid payment option!"); 
 

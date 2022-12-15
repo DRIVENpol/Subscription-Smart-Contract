@@ -71,9 +71,9 @@ abstract contract SubscriptionErc20AndEth is Ownable {
     event UserPaidEth(address indexed who, uint256 indexed fee, uint256 indexed period);
 
     /// @dev We transfer the ownership to a given owner
-    constructor(address owner) {
-        _transferOwnership(owner);
-        feeCollector = owner;
+    constructor() {
+        _transferOwnership(_msgSender());
+        feeCollector = _msgSender();
     }
 
     /// @dev Modifier to check if user's subscription is still active

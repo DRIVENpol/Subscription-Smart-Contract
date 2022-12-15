@@ -9,7 +9,6 @@ interface IToken {
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
 }
 
-
 /**
  * @title Subscription based smart contract
  * @notice Pay a monthly subscription in coins or erc20 tokens

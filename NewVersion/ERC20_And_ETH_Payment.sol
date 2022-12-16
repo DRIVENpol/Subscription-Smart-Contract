@@ -137,6 +137,11 @@ abstract contract SubscriptionErc20AndEth is Ownable {
         erc20Token = IToken(_newErc20Token);
     }
 
+    /// @dev Set a new payment collector
+    function setNewPaymentCollector(address _feeCollector) external virtual onlyOwner {
+        feeCollector = _feeCollector;
+    }
+
     /// @dev Withdraw erc20 tokens
     function withdrawErc20() external virtual onlyOwner {
         require(erc20Token.transferFrom(address(this), feeCollector, erc20Token.balanceOf(address(this))), "ERC20 Transfer Failed!");

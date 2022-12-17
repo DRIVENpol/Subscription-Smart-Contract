@@ -1,58 +1,66 @@
 // SPDX-License-Identifier: MIT
 
-// Solidity Version
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 
-// Ownership
 import "@openzeppelin/contracts/access/Ownable.sol";
+
+/**
+ * @title Subscription based smart contract
+ * @notice Pay a monthly subscription in Eth
+ * @author Socarde Paul-Constantin, DRIVENlabs Inc.
+ */
 
 abstract contract SubscriptionInEth is Ownable {
 
-    // Who can withdraw the fees
-    address public feeColector;
+    /// @dev Variables to manage the fee
+    uint256 public ethFee;
+    
+    /// @dev Variables for analytics
+    uint256 public totalPaymentsEth;
 
-    // Struct for payments
+    mapping (address => EthPayment ) public userPaymentEth;
+    mapping (address => uint256) public userTotalPaymentsEth;
+
+    /// @dev Where the fees will be sent
+    address public feeCollector;
+
+    /// @dev Struct for payments
+    /// @param user Who made the payment
+    /// @param paymentMoment When the last payment was made
+    /// @param paymentExpire When the user needs to pay again
     struct EthPayment {
         address user; // Who made the payment
         uint256 paymentMoment; // When the last payment was made
         uint256 paymentExpire; // When the user needs to pay again
     }
 
-    // Array of payments
+    /// @dev Array of Eth payments
     EthPayment[] public ethPayments;
 
-    // Link an user to its payment
-    mapping ( address => EthPayment ) public userPaymentEth;
-
-    // Fees
-    uint256 public ethFee; // Fee for ethereum payments
-
-    // Analytics
-    uint256 public totalPaymentsEth;
-    mapping (address => uint256) public userTotalPaymentsEth;
-
-    // Events
+    /// @dev Events
     event UserPaidEth(address indexed who, uint256 indexed fee, uint256 indexed period);
 
-    // Constructor
+    /// @dev We transfer the ownership to a given owner
     constructor() {
         _transferOwnership(_msgSender());
-        feeColector = _msgSender();
+        feeCollector = _msgSender();
     }
 
-    // Check if user paid - modifier
+    /// @dev Modifier to check if user's subscription is still active
     modifier userPaid() {
         require(block.timestamp < userPaymentEth[msg.sender].paymentExpire, "Your subscription expired!"); // Time now < time when last payment expire
         _;
     }
 
+    /// @dev Modifier to check if the caller is an EOA
      modifier callerIsUser() {
         require(tx.origin == msg.sender, "The caller can not be another smart contract!");
         _;
     }
 
-     // Make a payment
-    function paySubscription(uint256 _period) public payable virtual callerIsUser { 
+    /// @dev Function to pay the subscription
+    /// @param _period For how many months the user wants to pay the subscription
+    function paySubscription(uint256 _period) external payable virtual callerIsUser { 
         require(msg.value == ethFee * _period, "Invalid!");
 
         totalPaymentsEth = totalPaymentsEth + msg.value; // Compute total payments in Eth
@@ -65,28 +73,30 @@ abstract contract SubscriptionInEth is Ownable {
         emit UserPaidEth(msg.sender, ethFee * _period, _period);
     }
 
-    // Only-owner functions
-    function setEthFee(uint256 _newEthFee) public virtual onlyOwner {
+    /// @dev Set the monthly Eth fee
+    function setEthFee(uint256 _newEthFee) external virtual onlyOwner {
         ethFee = _newEthFee;
     }
 
-    function setNewPaymentCollector(address _feeColector) public virtual onlyOwner {
-        feeColector = _feeColector;
+    /// @dev Set a new payment collector
+    function setNewPaymentCollector(address _feeCollector) external virtual onlyOwner {
+        feeCollector = _feeCollector;
     }
 
-    function withdrawEth() public virtual onlyOwner {
-         payable(feeColector).transfer(address(this).balance);
+    /// @dev Withdraw the Eth balance of the smart contract
+    function withdrawEth() external virtual onlyOwner {
+        uint256 _amount = address(this).balance;
+
+        (bool sent, ) = feeCollector.call{value: _amount}("");
+        require(sent, "Transaction failed!");
     }
 
-    // Getters
-    function lastPaymentOfUser(address _user) public view virtual returns(uint256) {
+    /// @dev Get the last payment of user in Eth
+    function lastPaymentOfUserEth(address _user) external view virtual returns(uint256) {
         return userPaymentEth[_user].paymentMoment;
     }
 
-    function paymentsInSmartContract() public view virtual returns(uint256) {
+    function paymentsInSmartContractEth() external view virtual returns(uint256) {
         return address(this).balance;
     }
-    
-    // Created by @polthedev (https://twitter.com/polthedev) | DRIVENlabs Inc. (www.drivenecosystem.com)
-      
 }

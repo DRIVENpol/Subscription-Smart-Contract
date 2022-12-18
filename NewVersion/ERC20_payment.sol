@@ -1,3 +1,15 @@
+/**
+
+>>> UPDATES
+
+>>> 18 DEC 2022:
+        - Add Custom Errors;
+        - paySubscription function returns a boolean value so devs can perform actions
+          after a user successfully paid the subscription;
+
+ */
+
+
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.17;
@@ -50,6 +62,11 @@ abstract contract SubscriptionInErc20 is Ownable {
     /// @dev Events
     event UserPaidErc20(address indexed who, uint256 indexed fee, uint256 indexed period);
 
+    /// @dev Errors
+    error NotEOA();
+    error SubscriptionNotPaid();
+    error FailedErc20Transfer();
+
     /// @dev We transfer the ownership to a given owner
     constructor() {
         _transferOwnership(_msgSender());
@@ -58,21 +75,21 @@ abstract contract SubscriptionInErc20 is Ownable {
 
     /// @dev Modifier to check if user's subscription is still active
     modifier userPaid() {
-        require(block.timestamp < userPaymentErc20[msg.sender].paymentExpire, "Your subscription expired!"); // Time now < time when last payment expire
+        if(block.timestamp >= userPaymentErc20[msg.sender].paymentExpire) revert SubscriptionNotPaid();
         _;
     }
 
     /// @dev Modifier to check if the caller is an EOA
-     modifier callerIsUser() {
-        require(tx.origin == msg.sender, "The caller can not be another smart contract!");
+    modifier callerIsUser() {
+        if(tx.origin != msg.sender) revert NotEOA();
         _;
     }
 
     /// @dev Function to pay the subscription
     /// @param _period For how many months the user wants to pay the subscription
-    function paySubscription(uint256 _period) external payable virtual callerIsUser { 
+    function paySubscription(uint256 _period) external payable virtual callerIsUser returns(bool) { 
 
-        require(erc20Token.transferFrom(msg.sender, address(this), _period * erc20Fee));
+        if(erc20Token.transferFrom(msg.sender, address(this), _period * erc20Fee) == false) revert FailedErc20Transfer();
 
         totalPaymentsErc20 = totalPaymentsErc20 + msg.value; // Compute total payments in Eth
         userTotalPaymentsErc20[msg.sender] = userTotalPaymentsErc20[msg.sender] + msg.value; // Compute user's total payments in Eth
@@ -83,6 +100,7 @@ abstract contract SubscriptionInErc20 is Ownable {
 
         emit UserPaidErc20(msg.sender, erc20Fee * _period, _period);
 
+        return true;
     }
 
     /// @dev Set the monthly Erc20 fee
@@ -102,7 +120,7 @@ abstract contract SubscriptionInErc20 is Ownable {
 
     /// @dev Withdraw erc20 tokens
     function withdrawErc20() external virtual onlyOwner {
-        require(erc20Token.transferFrom(address(this), feeCollector, erc20Token.balanceOf(address(this))), "ERC20 Transfer Failed!");
+        if(erc20Token.transferFrom(address(this), feeCollector, erc20Token.balanceOf(address(this))) == false) revert FailedErc20Transfer(); 
     }
 
     /// @dev Get the last payment of user in Erc20

@@ -1,3 +1,15 @@
+/**
+
+>>> UPDATES
+
+>>> 18 DEC 2022:
+        - Add Custom Errors;
+        - paySubscription function returns a boolean value so devs can perform actions
+          after a user successfully paid the subscription;
+
+ */
+
+
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.17;
@@ -40,6 +52,11 @@ abstract contract SubscriptionInEth is Ownable {
     /// @dev Events
     event UserPaidEth(address indexed who, uint256 indexed fee, uint256 indexed period);
 
+    /// @dev Errors
+    error NotEOA();
+    error FailedEthTransfer();
+    error SubscriptionNotPaid();
+
     /// @dev We transfer the ownership to a given owner
     constructor() {
         _transferOwnership(_msgSender());
@@ -48,20 +65,21 @@ abstract contract SubscriptionInEth is Ownable {
 
     /// @dev Modifier to check if user's subscription is still active
     modifier userPaid() {
-        require(block.timestamp < userPaymentEth[msg.sender].paymentExpire, "Your subscription expired!"); // Time now < time when last payment expire
+        if(block.timestamp >= userPaymentEth[msg.sender].paymentExpire) revert SubscriptionNotPaid();
         _;
     }
 
     /// @dev Modifier to check if the caller is an EOA
-     modifier callerIsUser() {
-        require(tx.origin == msg.sender, "The caller can not be another smart contract!");
+    modifier callerIsUser() {
+        if(tx.origin != msg.sender) revert NotEOA();
         _;
     }
 
     /// @dev Function to pay the subscription
     /// @param _period For how many months the user wants to pay the subscription
-    function paySubscription(uint256 _period) external payable virtual callerIsUser { 
-        require(msg.value == ethFee * _period, "Invalid!");
+    function paySubscription(uint256 _period) external payable virtual callerIsUser returns(bool) { 
+
+        if(msg.value != ethFee * _period) revert FailedEthTransfer();
 
         totalPaymentsEth = totalPaymentsEth + msg.value; // Compute total payments in Eth
         userTotalPaymentsEth[msg.sender] = userTotalPaymentsEth[msg.sender] + msg.value; // Compute user's total payments in Eth
@@ -71,6 +89,8 @@ abstract contract SubscriptionInEth is Ownable {
         userPaymentEth[msg.sender] = newPayment; // User's last payment
 
         emit UserPaidEth(msg.sender, ethFee * _period, _period);
+
+        return true;
     }
 
     /// @dev Set the monthly Eth fee
@@ -88,7 +108,7 @@ abstract contract SubscriptionInEth is Ownable {
         uint256 _amount = address(this).balance;
 
         (bool sent, ) = feeCollector.call{value: _amount}("");
-        require(sent, "Transaction failed!");
+        if(sent == false) revert FailedEthTransfer();
     }
 
     /// @dev Get the last payment of user in Eth

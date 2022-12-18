@@ -1,3 +1,15 @@
+/**
+
+>>> UPDATES
+
+>>> 18 DEC 2022:
+        - Add Custom Errors;
+        - paySubscription function returns a boolean value so devs can perform actions
+          after a user successfully paid the subscription;
+
+ */
+
+
 //SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.17;
@@ -68,6 +80,15 @@ abstract contract SubscriptionErc20AndEth is Ownable {
     event UserPaidErc20(address indexed who, uint256 indexed fee, uint256 indexed period);
     event UserPaidEth(address indexed who, uint256 indexed fee, uint256 indexed period);
 
+    /// @dev Errors
+    error NotEOA();
+    error FailedEthTransfer();
+    error SubscriptionNotPaid();
+    error FailingToPayWithEth();
+    error FailedErc20Transfer();
+    error InvalidPaymentOption();
+
+
     /// @dev We transfer the ownership to a given owner
     constructor() {
         _transferOwnership(_msgSender());
@@ -76,13 +97,15 @@ abstract contract SubscriptionErc20AndEth is Ownable {
 
     /// @dev Modifier to check if user's subscription is still active
     modifier userPaid() {
-        require(block.timestamp < userPaymentEth[msg.sender].paymentExpire || block.timestamp < userPaymentErc20[msg.sender].paymentExpire, "Your payment expired!");
+        if(block.timestamp >= userPaymentEth[msg.sender].paymentExpire || 
+        block.timestamp >= userPaymentErc20[msg.sender].paymentExpire) 
+        revert SubscriptionNotPaid();
         _;
     }
 
     /// @dev Modifier to check if the caller is an EOA
     modifier callerIsUser() {
-        require(tx.origin == msg.sender, "The caller can not be another smart contract!");
+        if(tx.origin != msg.sender) revert NotEOA();
         _;
     }
 
@@ -90,12 +113,12 @@ abstract contract SubscriptionErc20AndEth is Ownable {
     /// @notice User can chose to pay either in Eth, either in Erc20 Tokens
     /// @param _period For how many months the user wants to pay the subscription
     /// @param _paymentOption 1 - if the user wants to pay in Eth; 2 - if the user wants to pay in Erc20
-    function paySubscription(uint256 _period, uint256 _paymentOption) external payable virtual callerIsUser {
-
-        require(_paymentOption == 1 || _paymentOption == 2, "Invalid payment option!"); 
+    function paySubscription(uint256 _period, uint256 _paymentOption) external payable virtual callerIsUser returns(bool) {
+        if(_paymentOption != 1 || _paymentOption != 2) revert InvalidPaymentOption();
 
         if(_paymentOption == 1) {
-            require(msg.value == ethFee * _period, "Invalid!");
+
+            if(msg.value != ethFee * _period) revert FailingToPayWithEth();
 
             totalPaymentsEth = totalPaymentsEth + msg.value; // Compute total payments in Eth
             userTotalPaymentsEth[msg.sender] = userTotalPaymentsEth[msg.sender] + msg.value; // Compute user's total payments in Eth
@@ -106,9 +129,11 @@ abstract contract SubscriptionErc20AndEth is Ownable {
 
             emit UserPaidEth(msg.sender, ethFee * _period, _period);
 
+            return true;
+
         } else if(_paymentOption == 2){
 
-            require(erc20Token.transferFrom(msg.sender, address(this), _period * erc20Fee), "ERC20 Transfer Failed!");
+            if(erc20Token.transferFrom(msg.sender, address(this), _period * erc20Fee) == false) revert FailedErc20Transfer();
 
             totalPaymentsErc20 = totalPaymentsErc20 + msg.value; // Compute total payments in Eth
             userTotalPaymentsErc20[msg.sender] = userTotalPaymentsErc20[msg.sender] + msg.value; // Compute user's total payments in Eth
@@ -119,7 +144,11 @@ abstract contract SubscriptionErc20AndEth is Ownable {
 
             emit UserPaidErc20(msg.sender, erc20Fee * _period, _period);
 
+            return true;
+
         }
+
+        return false;
     }
 
     /// @dev Set the monthly Eth fee
@@ -144,7 +173,7 @@ abstract contract SubscriptionErc20AndEth is Ownable {
 
     /// @dev Withdraw erc20 tokens
     function withdrawErc20() external virtual onlyOwner {
-        require(erc20Token.transferFrom(address(this), feeCollector, erc20Token.balanceOf(address(this))), "ERC20 Transfer Failed!");
+        if(erc20Token.transferFrom(address(this), feeCollector, erc20Token.balanceOf(address(this))) == false) revert FailedErc20Transfer(); 
     }
 
     /// @dev Withdraw the Eth balance of the smart contract
@@ -152,7 +181,7 @@ abstract contract SubscriptionErc20AndEth is Ownable {
         uint256 _amount = address(this).balance;
 
         (bool sent, ) = feeCollector.call{value: _amount}("");
-        require(sent, "Transaction failed!");
+        if(sent == false) revert FailedEthTransfer();
     }
 
     /// @dev Get the last payment of user in Eth

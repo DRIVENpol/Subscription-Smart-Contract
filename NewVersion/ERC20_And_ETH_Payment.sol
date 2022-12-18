@@ -84,7 +84,6 @@ abstract contract SubscriptionErc20AndEth is Ownable {
     error NotEOA();
     error FailedEthTransfer();
     error SubscriptionNotPaid();
-    error FailingToPayWithEth();
     error FailedErc20Transfer();
     error InvalidPaymentOption();
 
@@ -118,7 +117,7 @@ abstract contract SubscriptionErc20AndEth is Ownable {
 
         if(_paymentOption == 1) {
 
-            if(msg.value != ethFee * _period) revert FailingToPayWithEth();
+            if(msg.value != ethFee * _period) revert FailedEthTransfer();
 
             totalPaymentsEth = totalPaymentsEth + msg.value; // Compute total payments in Eth
             userTotalPaymentsEth[msg.sender] = userTotalPaymentsEth[msg.sender] + msg.value; // Compute user's total payments in Eth

@@ -81,7 +81,6 @@ abstract contract SubscriptionErc20AndEth is Ownable {
     event UserPaidEth(address indexed who, uint256 indexed fee, uint256 indexed period);
 
     /// @dev Errors
-    error NotEOA();
     error FailedEthTransfer();
     error SubscriptionNotPaid();
     error FailedErc20Transfer();
@@ -102,17 +101,11 @@ abstract contract SubscriptionErc20AndEth is Ownable {
         _;
     }
 
-    /// @dev Modifier to check if the caller is an EOA
-    modifier callerIsUser() {
-        if(tx.origin != msg.sender) revert NotEOA();
-        _;
-    }
-
     /// @dev Function to pay the subscription
     /// @notice User can chose to pay either in Eth, either in Erc20 Tokens
     /// @param _period For how many months the user wants to pay the subscription
     /// @param _paymentOption 1 - if the user wants to pay in Eth; 2 - if the user wants to pay in Erc20
-    function paySubscription(uint256 _period, uint256 _paymentOption) external payable virtual callerIsUser returns(bool) {
+    function paySubscription(uint256 _period, uint256 _paymentOption) external payable virtual returns(bool) {
         if(_paymentOption != 1 || _paymentOption != 2) revert InvalidPaymentOption();
 
         if(_paymentOption == 1) {

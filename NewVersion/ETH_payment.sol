@@ -69,15 +69,9 @@ abstract contract SubscriptionInEth is Ownable {
         _;
     }
 
-    /// @dev Modifier to check if the caller is an EOA
-    modifier callerIsUser() {
-        if(tx.origin != msg.sender) revert NotEOA();
-        _;
-    }
-
     /// @dev Function to pay the subscription
     /// @param _period For how many months the user wants to pay the subscription
-    function paySubscription(uint256 _period) external payable virtual callerIsUser returns(bool) { 
+    function paySubscription(uint256 _period) external payable virtual returns(bool) { 
 
         if(msg.value != ethFee * _period) revert FailedEthTransfer();
 

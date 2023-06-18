@@ -1,15 +1,3 @@
-/**
-
->>> UPDATES
-
->>> 18 DEC 2022:
-        - Add Custom Errors;
-        - paySubscription function returns a boolean value so devs can perform actions
-          after a user successfully paid the subscription;
-
- */
-
-
 //SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.17;
@@ -28,10 +16,6 @@ interface IToken {
  */
 
 abstract contract SubscriptionErc20AndEth is Ownable {
-
-    /// @dev IToken Object - IERC20
-    IToken public erc20Token;
-
     /// @dev Variables to manage the fee for each type of payment
     uint256 public ethFee; // Fee for ethereum payments
     uint256 public erc20Fee; // Fee for ethereum payments
@@ -40,11 +24,14 @@ abstract contract SubscriptionErc20AndEth is Ownable {
     uint256 public totalPaymentsEth;
     uint256 public totalPaymentsErc20;
 
+    /// @dev Where the fees will be sent
+    address public feeCollector;
+
     mapping (address => uint256) public userTotalPaymentsEth;
     mapping (address => uint256) public userTotalPaymentsErc20;
 
-    /// @dev Where the fees will be sent
-    address public feeCollector;
+    /// @dev IToken Object - IERC20
+    IToken public erc20Token;
 
     /// @dev Struct for payments
     /// @param user Who made the payment

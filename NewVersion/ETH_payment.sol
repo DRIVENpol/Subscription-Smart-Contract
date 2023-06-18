@@ -1,15 +1,3 @@
-/**
-
->>> UPDATES
-
->>> 18 DEC 2022:
-        - Add Custom Errors;
-        - paySubscription function returns a boolean value so devs can perform actions
-          after a user successfully paid the subscription;
-
- */
-
-
 // SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.17;
@@ -30,11 +18,11 @@ abstract contract SubscriptionInEth is Ownable {
     /// @dev Variables for analytics
     uint256 public totalPaymentsEth;
 
-    mapping (address => EthPayment ) public userPaymentEth;
-    mapping (address => uint256) public userTotalPaymentsEth;
-
     /// @dev Where the fees will be sent
     address public feeCollector;
+
+    mapping(address => EthPayment) public userPaymentEth;
+    mapping(address => uint256) public userTotalPaymentsEth;
 
     /// @dev Struct for payments
     /// @param user Who made the payment
@@ -71,15 +59,29 @@ abstract contract SubscriptionInEth is Ownable {
 
     /// @dev Function to pay the subscription
     /// @param _period For how many months the user wants to pay the subscription
-    function paySubscription(uint256 _period) external payable virtual returns(bool) { 
-
+    function paySubscription(
+        uint256 _period
+        ) 
+        external 
+        payable 
+        virtual 
+        returns(bool) 
+    { 
         if(msg.value != ethFee * _period) revert FailedEthTransfer();
 
-        totalPaymentsEth = totalPaymentsEth + msg.value; // Compute total payments in Eth
-        userTotalPaymentsEth[msg.sender] = userTotalPaymentsEth[msg.sender] + msg.value; // Compute user's total payments in Eth
+        unchecked {
+            totalPaymentsEth += msg.value; // Compute total payments in Eth
+            userTotalPaymentsEth[msg.sender] += msg.value; // Compute user's total payments in Eth 
+        }
 
-        EthPayment memory newPayment = EthPayment(msg.sender, block.timestamp, block.timestamp + _period * 30 days);
+        EthPayment memory newPayment = EthPayment(
+            msg.sender, 
+            block.timestamp, 
+            block.timestamp + _period * 30 days
+            );
+
         ethPayments.push(newPayment); // Push the payment in the payments array
+
         userPaymentEth[msg.sender] = newPayment; // User's last payment
 
         emit UserPaidEth(msg.sender, ethFee * _period, _period);

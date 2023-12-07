@@ -2,12 +2,9 @@
 
 pragma solidity ^0.8.17;
 
-import "@openzeppelin/contracts/access/Ownable.sol";
-
-interface IToken {
-    function balanceOf(address account) external view returns (uint256);
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
-}
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
  * @title Subscription based smart contract
@@ -16,6 +13,8 @@ interface IToken {
  */
 
 abstract contract SubscriptionErc20AndEth is Ownable {
+    using SafeERC20 for IERC20;
+
     /// @dev Variables to manage the fee for each type of payment
     uint256 public ethFee; // Fee for ethereum payments
     uint256 public erc20Fee; // Fee for ethereum payments
@@ -30,8 +29,8 @@ abstract contract SubscriptionErc20AndEth is Ownable {
     mapping (address => uint256) public userTotalPaymentsEth;
     mapping (address => uint256) public userTotalPaymentsErc20;
 
-    /// @dev IToken Object - IERC20
-    IToken public erc20Token;
+    /// @dev IERC20 Object - IERC20
+    IERC20 public erc20Token;
 
     /// @dev Struct for payments
     /// @param user Who made the payment
@@ -75,9 +74,8 @@ abstract contract SubscriptionErc20AndEth is Ownable {
 
 
     /// @dev We transfer the ownership to a given owner
-    constructor() {
-        _transferOwnership(_msgSender());
-        feeCollector = _msgSender();
+    constructor() Ownable(msg.sender) {
+        feeCollector = msg.sender;
     }
 
     /// @dev Modifier to check if user's subscription is still active
@@ -111,11 +109,19 @@ abstract contract SubscriptionErc20AndEth is Ownable {
             return true;
 
         } else if(_paymentOption == 2){
+            // We add support for tokens with fees on transfer
+            uint256 _balanceBefore = erc20Token.balanceOf(address(this));
 
-            if(erc20Token.transferFrom(msg.sender, address(this), _period * erc20Fee) == false) revert FailedErc20Transfer();
+            IERC20(erc20Token).safeTransferFrom(msg.sender, address(this), _period * erc20Fee);
 
-            totalPaymentsErc20 = totalPaymentsErc20 + msg.value; // Compute total payments in Eth
-            userTotalPaymentsErc20[msg.sender] = userTotalPaymentsErc20[msg.sender] + msg.value; // Compute user's total payments in Eth
+            uint256 _balanceAfter = erc20Token.balanceOf(address(this));
+
+            uint256 _delta = _balanceAfter - _balanceBefore;
+
+            unchecked {
+                totalPaymentsErc20 += _delta; // Compute total payments in ERC20
+                userTotalPaymentsErc20[msg.sender] += _delta; // Compute user's total payments in ERC20         
+            }
 
             Erc20Payment memory newPayment = Erc20Payment(msg.sender, block.timestamp, block.timestamp + _period * 30 days);
             erc20Payments.push(newPayment); // Push the payment in the payments array
@@ -124,7 +130,6 @@ abstract contract SubscriptionErc20AndEth is Ownable {
             emit UserPaidErc20(msg.sender, erc20Fee * _period, _period);
 
             return true;
-
         }
 
         return false;
@@ -142,7 +147,7 @@ abstract contract SubscriptionErc20AndEth is Ownable {
 
     /// @dev Set the Erc20 token
     function setErc20TokenForPayments(address _newErc20Token) external virtual onlyOwner {
-        erc20Token = IToken(_newErc20Token);
+        erc20Token = IERC20(_newErc20Token);
     }
 
     /// @dev Set a new payment collector
@@ -152,7 +157,8 @@ abstract contract SubscriptionErc20AndEth is Ownable {
 
     /// @dev Withdraw erc20 tokens
     function withdrawErc20() external virtual onlyOwner {
-        if(erc20Token.transferFrom(address(this), feeCollector, erc20Token.balanceOf(address(this))) == false) revert FailedErc20Transfer(); 
+        uint256 _balance = erc20Token.balanceOf(address(this));
+        IERC20(erc20Token).safeTransfer(feeCollector, _balance);
     }
 
     /// @dev Withdraw the Eth balance of the smart contract

@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.17;
 
-// Ownership
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -67,8 +66,6 @@ abstract contract SubscriptionInErc20 is Ownable {
     /// @dev Function to pay the subscription
     /// @param _period For how many months the user wants to pay the subscription
     function paySubscription(uint256 _period) external payable virtual returns(bool) { 
-        if(erc20Token.transferFrom(msg.sender, address(this), _period * erc20Fee) == false) revert FailedErc20Transfer();
-
         // We add support for tokens with fees on transfer
         uint256 _balanceBefore = erc20Token.balanceOf(address(this));
 
@@ -109,7 +106,7 @@ abstract contract SubscriptionInErc20 is Ownable {
 
     /// @dev Withdraw erc20 tokens
     function withdrawErc20() external virtual onlyOwner {
-        uint256 _balance = IERC20(erc20Token).balanceOf(address(this));
+        uint256 _balance = erc20Token.balanceOf(address(this));
         IERC20(erc20Token).transfer(msg.sender, _balance);
     }
 

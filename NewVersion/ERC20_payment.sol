@@ -3,12 +3,9 @@
 pragma solidity ^0.8.17;
 
 // Ownership
-import "@openzeppelin/contracts/access/Ownable.sol";
-
-interface IToken {
-    function balanceOf(address account) external view returns (uint256);
-    function transferFrom(address from, address to, uint256 amount) external returns (bool);
-}
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /**
  * @title Subscription based smart contract
@@ -17,6 +14,7 @@ interface IToken {
  */
 
 abstract contract SubscriptionInErc20 is Ownable {
+    using SafeERC20 for IERC20;
 
     /// @dev The subscription fee
     uint256 public erc20Fee;
@@ -27,8 +25,8 @@ abstract contract SubscriptionInErc20 is Ownable {
     /// @dev Where the fees will be sent
     address public feeCollector;
 
-    /// @dev IToken Object - IERC20
-    IToken public erc20Token;
+    /// @dev IERC20 Object - IERC20
+    IERC20 public erc20Token;
 
     /// @dev Struct for payments
     /// @param user Who made the payment
@@ -56,9 +54,8 @@ abstract contract SubscriptionInErc20 is Ownable {
     error FailedErc20Transfer();
 
     /// @dev We transfer the ownership to a given owner
-    constructor() {
-        _transferOwnership(_msgSender());
-        feeCollector = _msgSender();
+    constructor() Ownable(msg.sender) {
+        feeCollector = msg.sender;
     }
 
     /// @dev Modifier to check if user's subscription is still active
@@ -72,9 +69,18 @@ abstract contract SubscriptionInErc20 is Ownable {
     function paySubscription(uint256 _period) external payable virtual returns(bool) { 
         if(erc20Token.transferFrom(msg.sender, address(this), _period * erc20Fee) == false) revert FailedErc20Transfer();
 
+        // We add support for tokens with fees on transfer
+        uint256 _balanceBefore = erc20Token.balanceOf(address(this));
+
+        IERC20(erc20Token).safeTransferFrom(msg.sender, address(this), _period * erc20Fee);
+
+        uint256 _balanceAfter = erc20Token.balanceOf(address(this));
+
+        uint256 _delta = _balanceAfter - _balanceBefore;
+
         unchecked {
-            totalPaymentsErc20 += msg.value; // Compute total payments in Eth
-            userTotalPaymentsErc20[msg.sender] += msg.value; // Compute user's total payments in Eth           
+            totalPaymentsErc20 += _delta; // Compute total payments in ERC20
+            userTotalPaymentsErc20[msg.sender] += _delta; // Compute user's total payments in ERC20         
         }
 
         Erc20Payment memory newPayment = Erc20Payment(msg.sender, block.timestamp, block.timestamp + _period * 30 days);
@@ -93,7 +99,7 @@ abstract contract SubscriptionInErc20 is Ownable {
 
     /// @dev Set the erc20 token for payments
     function setErc20TokenForPayments(address _newErc20Token) external virtual onlyOwner {
-        erc20Token = IToken(_newErc20Token);
+        erc20Token = IERC20(_newErc20Token);
     }
 
     /// @dev Set a new payment collector
@@ -103,7 +109,8 @@ abstract contract SubscriptionInErc20 is Ownable {
 
     /// @dev Withdraw erc20 tokens
     function withdrawErc20() external virtual onlyOwner {
-        if(erc20Token.transferFrom(address(this), feeCollector, erc20Token.balanceOf(address(this))) == false) revert FailedErc20Transfer(); 
+        uint256 _balance = IERC20(erc20Token).balanceOf(address(this));
+        IERC20(erc20Token).transfer(msg.sender, _balance);
     }
 
     /// @dev Get the last payment of user in Erc20
